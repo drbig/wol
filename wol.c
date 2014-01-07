@@ -42,9 +42,8 @@ int makepayload(char *mac) {
   for (i = 0; i < 6; i++)
     if (sscanf(mac+3*i, "%2X", &x) != 1)
       return -1;
-    else
-      for (c = 0; c < 16; c++)
-        payload[6*c+6+i] = (unsigned char)x;
+    for (c = 0; c < 16; c++)
+      payload[6*c+6+i] = (unsigned char)x;
 
   return 0;
 }
