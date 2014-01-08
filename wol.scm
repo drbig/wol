@@ -11,19 +11,16 @@
                 (nox.l   "00:40:63:D5:8B:65")
                 (rpi.l   "B8:27:EB:0D:EB:01")))
 
-(use-modules (rnrs bytevectors)
-             (srfi srfi-1))
+(use-modules (rnrs bytevectors) (srfi srfi-1))
 
 (define (payload-parse mac)
-  (fold-right
-    (lambda (x rs) (cons (string->number x 16) rs))
-    '() (string-split mac #\:)))
+  (fold-right (lambda (x rs) (cons (string->number x 16) rs))
+              '() (string-split mac #\:)))
 
 (define (payload-make mac)
   (u8-list->bytevector
-    (append
-      (make-list 6 255)
-      (fold append '() (make-list 16 (payload-parse mac))))))
+    (append (make-list 6 255)
+            (fold append '() (make-list 16 (payload-parse mac))))))
 
 (let ((sock (socket PF_INET SOCK_DGRAM 0))
       (target (make-socket-address AF_INET (inet-pton AF_INET BRDIP) 9 MSG_PEEK)))
@@ -32,7 +29,7 @@
     (map (lambda (token)
            (let ((addr (assq-ref MACTB (string->symbol token))))
              (begin
-               (if addr (set! addr (car addr)) (set! addr token))
+               (set! addr (if addr (car addr) token))
                (unless
                  (false-if-exception
                    (map (lambda (x) (sendto sock (payload-make addr) target)) '(1 2 3)))
