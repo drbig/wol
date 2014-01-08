@@ -1,0 +1,38 @@
+# Wake-On-Lan
+
+- The what: a simple [WOL](http://en.wikipedia.org/wiki/Wake-on-LAN) utility.
+- The why: get a feel of different languages while solving a real problem, and have fun.
+
+### Rules
+
+- Built-in broadcast IP and a map/hash for most often used [MAC](http://en.wikipedia.org/wiki/MAC_address)s
+- Arguments are either MAC addresses or keys from the map/hash
+- Try to do at least a minimal validation of the MAC address before moving on
+- Use only what is provided by default by the language/platform (i.e. no external dependencies)
+- Be clear and concise, both in source and interaction
+
+### Results
+
+Currently I have implemented (in chronological order):
+
+- **Ruby** - reference implementation, shortest, does most validation on the input
+- **Scheme** - rewritten, two implementations (list- and array-based), second in terms of length
+- **OCaml** - my first ever anything in OCaml, works
+- **C** - fastest to write after the Ruby version, [Valgrind](http://valgrind.org) says it's ok, but it's _definitely_ not secure
+- **Go** - an annoying-to-write _calque_ of the C version, works
+
+I have also included [cloc.pl](http://cloc.sourceforge.net/) output (for the main implementations) in *cloc.txt*, and ls output for binary version in *bins.txt*.
+
+**Fun facts**:
+
+- Of all implementation only Ruby's is readily reusable (it's a module)
+- Ruby and list-based Scheme versions differ in size only by exactly 10 lines of code
+- Scheme is very flexible, and does _not_ really enforce any particular way of doing stuff
+- Go binary is _327.68_ times larger than C binary, and 6 times larger than OCaml's
+- Solving the same problem in different languages is fun
+
+### Other comments
+
+I'm not a programmer, but I'm still looking for the language that will have the _yin_ of practice and the _yang_ of divine enlightenment. Ruby and Scheme are the forerunners, but they are far from perfect balance.
+
+If you like to comment, or maybe contribute a version in some more [esoteric](http://en.wikipedia.org/wiki/Brainfuck) language, please drop me a line at p.staszewski@gmail.com or see /msg me on IRC (freenode or IRCNet, nick: drbig).
