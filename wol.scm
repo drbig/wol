@@ -14,39 +14,27 @@
 (use-modules (rnrs bytevectors)
              (srfi srfi-1))
 
-(define-syntax times
-  (syntax-rules ()
-                ((times count body ...)
-                 (do ((i 1 (1+ i))) ((> i count))
-                   (begin body ...)))))
-
-(define (die msg)
-  (map display (list "ERROR: " msg "!"))
-  (newline)
-  (exit 2))
-
-(define (mac-get key)
-  (let ((mac (assq key MACTB)))
-    (if mac
-      (cadr mac)
-      (die (format #f "Host '~s' not found" key)))))
+(define (payload-parse mac)
+  (fold-right
+    (lambda (x rs) (cons (string->number x 16) rs))
+    '() (string-split mac #\:)))
 
 (define (payload-make mac)
   (u8-list->bytevector
     (append
       (make-list 6 255)
-      (fold append '() (make-list 16 (fold-right
-                                       (lambda (x rs)
-                                         (cons (string->number x 16) rs))
-                                       '() (string-split mac #\:)))))))
+      (fold append '() (make-list 16 (payload-parse mac))))))
 
-(define (payload-send payload)
-  (let ((sock (socket PF_INET SOCK_DGRAM 0))
-        (target (make-socket-address AF_INET (inet-pton AF_INET BRDIP) 9 MSG_PEEK)))
+(let ((sock (socket PF_INET SOCK_DGRAM 0))
+      (target (make-socket-address AF_INET (inet-pton AF_INET BRDIP) 9 MSG_PEEK)))
+  (begin
     (setsockopt sock SOL_SOCKET SO_BROADCAST 1)
-    (times 3 (sendto sock payload target))))
-
-(payload-send
-  (payload-make
-    (mac-get
-      (string->symbol (cadr (command-line))))))
+    (map (lambda (token)
+           (let ((addr (assq-ref MACTB (string->symbol token))))
+             (begin
+               (if addr (set! addr (car addr)) (set! addr token))
+               (unless
+                 (false-if-exception
+                   (map (lambda (x) (sendto sock (payload-make addr) target)) '(1 2 3)))
+                 (display (string-append token ": parse error!\n"))))))
+         (cdr (command-line)))))
